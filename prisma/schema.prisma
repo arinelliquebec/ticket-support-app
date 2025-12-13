@@ -1,0 +1,139 @@
+// prisma/schema.prisma - Add filial field to Ticket model
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id           String  @id @default(cuid())
+  username     String  @unique
+  email        String  @unique
+  passwordHash String
+  avatarUrl    String?
+
+  role        role             @default(USER)
+  sessions    Session[]
+  roles       Roles[]
+  tickets     Ticket[]
+  comments    Comment[] // Relação com comentários
+  attachments FileAttachment[]
+}
+
+model Roles {
+  id    String @id @default(uuid())
+  name  String @unique
+  users User[]
+}
+
+enum role {
+  ADMIN
+  USER
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  userId    String
+  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Modelo para categorias de tickets
+model TicketCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  color       String   @default("#6366F1")
+  icon        String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tickets     Ticket[]
+}
+
+model Ticket {
+  id            String           @id @default(cuid())
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  title         String
+  content       String           @db.VarChar(1024)
+  status        TicketStatus     @default(ABERTO)
+  priority      TicketPriority   @default(BAIXA)
+  deadline      String
+  filial        String? // New field for branch/filial
+  viewedByAdmin Boolean          @default(false) // Track if admin has viewed this ticket
+  userId        String?
+  user          User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  attachments   FileAttachment[]
+
+  // Relação com categoria
+  categoryId String?
+  category   TicketCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  // Relação com comentários
+  comments Comment[]
+
+  @@index([categoryId])
+  @@index([priority])
+  @@index([status, priority])
+  @@index([viewedByAdmin])
+  @@index([viewedByAdmin, createdAt])
+}
+
+// Modelo para comentários
+model Comment {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  content   String   @db.VarChar(1024)
+
+  // Relação com usuário
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Relação com ticket
+  ticketId String
+  ticket   Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([ticketId])
+}
+
+enum TicketStatus {
+  ABERTO
+  EM_ANDAMENTO
+  CONCLUÍDO
+}
+
+enum TicketPriority {
+  BAIXA
+  MEDIA
+  ALTA
+  URGENTE
+}
+
+model FileAttachment {
+  id          String   @id @default(cuid())
+  fileName    String
+  fileSize    Int
+  fileType    String
+  fileUrl     String
+  s3ObjectKey String? // Nova coluna para armazenar a chave do objeto no S3
+  createdAt   DateTime @default(now())
+
+  // Relations
+  ticketId String
+  ticket   Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([ticketId])
+  @@index([userId])
+}
