@@ -248,13 +248,8 @@ Les contributions sont les bienvenues ! Veuillez lire nos directives de contribu
 
 ## 📄 Licence
 
-Ce projet est un logiciel propriétaire développé par Fradema Tax Consulting © 2025.
+Ce projet est un logiciel propriétaire développé par Arinelli Quebec © 2025.
 
 ---
 
-<div align="center">
-
-**Développé avec ❤️ par l'Équipe de Développement Fradema**
-
-</div>
 
