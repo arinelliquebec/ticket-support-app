@@ -1,5 +1,7 @@
 
-### MADE BY PATRICK ARINELLI @ 2025 Fradema Tax Consulting
+### MADE BY PATRICK ARINELLI @ 2025 
+
+### PROJECT LINK > ticket-support-app-nu.vercel.app  ( hosted in vercel )
 
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
